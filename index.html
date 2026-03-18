@@ -2,63 +2,223 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>FaceID Auth | Максим</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Secret</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="app.png">
+
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
-        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
-        button { background: #007AFF; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        button:disabled { background: #ccc; }
+        :root {
+            --ios-bg: #000000;
+            --ios-card: rgba(28, 28, 30, 0.8);
+            --ios-blue: #007AFF;
+            --ios-text: #ffffff;
+            --ios-secondary: #8e8e93;
+            --blur: saturate(180%) blur(20px);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            background-color: var(--ios-bg);
+            color: var(--ios-text);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* --- ЕКРАН ВХОДУ --- */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s;
+        }
+
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .login-btn {
+            background: var(--ios-text);
+            color: #000;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 40px;
+        }
+
+        /* --- ГОЛОВНИЙ ЕКРАН --- */
+        #main-screen {
+            display: none; /* Сховано до авторизації */
+            height: 100vh;
+            opacity: 0;
+            flex-direction: column;
+            transition: opacity 0.5s;
+        }
+
+        /* iOS 26 Large Title Header */
+        header {
+            padding: 60px 20px 10px 20px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        h1.large-title {
+            font-size: 34px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            text-align: center;
+            color: var(--ios-secondary);
+        }
+
+        /* iOS 26 Tab Bar */
+        .tab-bar {
+            height: 85px;
+            background: var(--ios-card);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 20px; /* Відступ для Home Indicator */
+            border-top: 0.5px solid rgba(255,255,255,0.1);
+        }
+
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--ios-secondary);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .tab-item.active { color: var(--ios-blue); }
+
+        .tab-icon {
+            width: 26px;
+            height: 26px;
+            margin-bottom: 4px;
+            fill: currentColor;
+        }
+
+        /* Допоміжні класи */
+        .hidden { display: none !important; }
+        .visible { display: flex !important; opacity: 1 !important; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Вхід для Максима</h2>
-    <p>Використовуй FaceID для швидкого доступу</p>
-    <button id="auth-btn">Увійти через FaceID</button>
-    <p id="status"></p>
+<div id="login-screen">
+    <img src="app.png" alt="Secret" class="app-icon">
+    <h2 style="font-weight: 500;">Вітаємо, Максим</h2>
+    <p style="color: var(--ios-secondary);">Вхід за допомогою FaceID</p>
+    <button class="login-btn" onclick="authenticate()">Увійти</button>
+</div>
+
+<div id="main-screen">
+    <header>
+        <h1 class="large-title">Головна</h1>
+    </header>
+
+    <div class="content">
+        <p>Тут буде твій секретний контент...</p>
+    </div>
+
+    <nav class="tab-bar">
+        <a href="#" class="tab-item active">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            <span>Головна</span>
+        </a>
+        
+        <a href="#" class="tab-item" id="search-btn">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <span>Пошук</span>
+        </a>
+
+        <a href="#" class="tab-item">
+            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            <span>Профіль</span>
+        </a>
+    </nav>
 </div>
 
 <script>
-document.getElementById('auth-btn').addEventListener('click', async () => {
-    const status = document.getElementById('status');
-    
-    // Перевірка, чи підтримує пристрій біометрію в браузері
-    if (!window.PublicKeyCredential) {
-        status.innerText = "Твій браузер не підтримує WebAuthn :(";
-        return;
+    async function authenticate() {
+        const loginScreen = document.getElementById('login-screen');
+        const mainScreen = document.getElementById('main-screen');
+
+        if (!window.PublicKeyCredential) {
+            alert("Твій iPhone не підтримує WebAuthn у цьому браузері.");
+            return;
+        }
+
+        // Налаштування для FaceID
+        const options = {
+            challenge: crypto.getRandomValues(new Uint8Array(32)),
+            rp: { name: "Secret", id: window.location.hostname },
+            user: {
+                id: crypto.getRandomValues(new Uint8Array(16)),
+                name: "maksym@knu.ua",
+                displayName: "Максим"
+            },
+            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+            authenticatorSelection: { authenticatorAttachment: "platform" },
+            timeout: 60000
+        };
+
+        try {
+            // Виклик системного вікна FaceID
+            await navigator.credentials.create({ publicKey: options });
+            
+            // Анімація переходу
+            loginScreen.style.transform = "scale(0.9)";
+            loginScreen.style.opacity = "0";
+            
+            setTimeout(() => {
+                loginScreen.classList.add('hidden');
+                mainScreen.classList.add('visible');
+            }, 500);
+
+        } catch (err) {
+            console.error("Відмова:", err);
+            // Для тестування на девайсах без HTTPS:
+            // loginScreen.classList.add('hidden'); mainScreen.classList.add('visible'); 
+        }
     }
 
-    // Параметри для створення ключа (спрощено)
-    // У реальному застосунку ці дані (challenge, user id) приходять з бекенду
-    const publicKeyCredentialCreationOptions = {
-        challenge: Uint8Array.from("random-string-from-server", c => c.charCodeAt(0)),
-        rp: { name: "Мій Крутий Додаток", id: window.location.hostname },
-        user: {
-            id: Uint8Array.from("user-id-123", c => c.charCodeAt(0)),
-            name: "Maksym",
-            displayName: "Максим"
-        },
-        pubKeyCredParams: [{ alg: -7, type: "public-key" }], // ES256 алгоритм
-        authenticatorSelection: { authenticatorAttachment: "platform" }, // "platform" активує FaceID/TouchID
-        timeout: 60000,
-        attestation: "direct"
-    };
-
-    try {
-        status.innerText = "Сканування...";
-        const credential = await navigator.credentials.create({
-            publicKey: publicKeyCredentialCreationOptions
+    // Вібровідгук при натисканні на таби (Haptic Feedback)
+    document.querySelectorAll('.tab-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.navigator.vibrate) window.navigator.vibrate(10);
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            item.classList.add('active');
         });
-        
-        console.log("Успіх!", credential);
-        status.innerText = "Готово! Дані відправлено на сервер.";
-        // Тут ти відправляєш credential на свій сервер для перевірки
-    } catch (err) {
-        console.error(err);
-        status.innerText = "Помилка або скасовано: " + err.message;
-    }
-});
+    });
 </script>
 
 </body>
