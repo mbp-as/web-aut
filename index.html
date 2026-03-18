@@ -2,163 +2,169 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Secret</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="app.png">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Auth | Максим</title>
     <style>
-        :root {
-            --ios-bg: #000;
-            --ios-card: rgba(28, 28, 30, 0.8);
-            --ios-blue: #007AFF;
-            --ios-text: #fff;
-            --ios-secondary: #8e8e93;
-            --blur: saturate(180%) blur(20px);
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--ios-bg); color: var(--ios-text); font-family: -apple-system, sans-serif; overflow: hidden; height: 100vh; }
-
-        #login-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; text-align: center; }
-        .app-icon { width: 120px; height: 120px; border-radius: 28px; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        
-        input { 
-            background: #1c1c1e; border: none; color: #fff; padding: 15px; 
-            border-radius: 12px; width: 260px; margin-bottom: 15px; font-size: 16px; outline: none;
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
         }
-
-        .btn { 
-            background: #fff; color: #000; border: none; padding: 15px 40px; 
-            border-radius: 12px; font-weight: 600; font-size: 17px; cursor: pointer; width: 260px;
+        .logo-box {
+            background: linear-gradient(135deg, #FFB000, #FFCC00);
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
-
-        #main-screen { display: none; height: 100vh; flex-direction: column; opacity: 0; transition: opacity 0.5s; }
-        header { padding: 60px 20px 10px; background: rgba(0,0,0,0.5); backdrop-filter: var(--blur); }
-        .large-title { font-size: 34px; font-weight: 700; margin: 0; }
-
-        .tab-bar { 
-            position: fixed; bottom: 0; width: 100%; height: 85px; background: var(--ios-card); 
-            backdrop-filter: var(--blur); display: flex; justify-content: space-around; 
-            align-items: center; padding-bottom: 20px; border-top: 0.5px solid rgba(255,255,255,0.1);
+        .shield-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); /* Спрощений щит */
         }
-        .tab-item { color: var(--ios-secondary); text-decoration: none; font-size: 10px; display: flex; flex-direction: column; align-items: center; }
-        .tab-item.active { color: var(--ios-blue); }
-        .tab-icon { width: 26px; height: 26px; margin-bottom: 4px; fill: currentColor; }
+        h1 { font-size: 2.2rem; margin-bottom: 30px; font-weight: 600; }
+        .input-field {
+            background: #1C1C1E;
+            border: none;
+            color: white;
+            padding: 15px;
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        .btn-auth {
+            background: white;
+            color: black;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-auth:active { opacity: 0.7; }
+        #debug-info {
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: #8E8E93;
+            text-align: left;
+            background: #1C1C1E;
+            padding: 15px;
+            border-radius: 10px;
+            display: none; /* Показуємо тільки при помилці або натисканні */
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .error-text { color: #FF453A; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <img src="app.png" alt="Secret" class="app-icon">
-    <h1 style="margin-bottom: 20px;">Secret</h1>
-    <input type="text" id="username" placeholder="Твоє ім'я (наприклад, Максим)">
-    <button class="btn" id="auth-btn">Увійти з FaceID</button>
-    <p id="status" style="font-size: 13px; color: var(--ios-secondary); margin-top: 15px; padding: 0 20px;"></p>
-</div>
-
-<div id="main-screen">
-    <header><h1 class="large-title">Головна</h1></header>
-    <div style="padding: 20px; color: var(--ios-secondary);">
-        Вітаємо, <span id="display-name" style="color: #fff;"></span>!<br><br>
-        Твій секретний простір активовано.
+<div class="container">
+    <div class="logo-box">
+        <div class="shield-icon"></div>
     </div>
+    <h1>Secret</h1>
 
-    <nav class="tab-bar">
-        <div class="tab-item active">
-            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            <span>Головна</span>
-        </div>
-        <div class="tab-item">
-            <svg class="tab-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-            <span>Пошук</span>
-        </div>
-    </nav>
+    <input type="text" class="input-field" value="Максим" readonly>
+    <button id="auth-btn" class="btn-auth">Увійти з FaceID</button>
+
+    <div id="debug-info"></div>
 </div>
 
 <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwkCUG-Ov_dzhBLbULCiNQXpMPBnw1IvmkaQKwl5sMQ68LB9KZrYkJopmNTeiRw0Xex/exec";
+const btn = document.getElementById('auth-btn');
+const debug = document.getElementById('debug-info');
 
-    document.getElementById('auth-btn').addEventListener('click', async () => {
-        const username = document.getElementById('username').value.trim();
-        const status = document.getElementById('status');
+function log(message, isError = false) {
+    debug.style.display = 'block';
+    const span = document.createElement('div');
+    if (isError) span.className = 'error-text';
+    span.innerText = `> ${message}`;
+    debug.appendChild(span);
+    console.log(message);
+}
 
-        if (!username) {
-            status.innerText = "Введи своє ім'я!";
-            return;
+btn.addEventListener('click', async () => {
+    debug.innerHTML = ''; // Очистити лог
+    log("Запуск автентифікації...");
+
+    try {
+        // ПЕРЕВІРКА 1: Протокол
+        log(`Протокол: ${window.location.protocol}`);
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            throw new Error("Браузер блокує FaceID на HTTP. Потрібен HTTPS.");
         }
 
-        status.innerText = "Зв'язок з базою...";
+        // ПЕРЕВІРКА 2: Наявність API
+        if (!window.PublicKeyCredential) {
+            throw new Error("Ваш браузер не підтримує WebAuthn API.");
+        }
 
-        try {
-            // Перевіряємо, чи є такий юзер у таблиці
-            const response = await fetch(GAS_URL + "?action=check&username=" + encodeURIComponent(username));
-            const result = await response.json();
+        // ПЕРЕВІРКА 3: Доступність біометрії
+        const isAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        log(`Біометрія доступна: ${isAvailable}`);
+        if (!isAvailable) {
+            throw new Error("Платформний автентифікатор (FaceID) недоступний або вимкнений.");
+        }
 
-            if (result.status === "not_found") {
-                status.innerText = "Створюємо новий профіль. Скануй FaceID...";
-                await register(username);
-            } else {
-                status.innerText = "Профіль знайдено. Підтвердь особу...";
-                await login(username);
+        // ПАРАМЕТРИ (спрощені для тесту реєстрації)
+        const challenge = new Uint8Array(32); 
+        window.crypto.getRandomValues(challenge);
+
+        const options = {
+            publicKey: {
+                challenge: challenge,
+                rp: { name: "Secret App", id: window.location.hostname },
+                user: {
+                    id: Uint8Array.from("USER_ID_MAX", c => c.charCodeAt(0)),
+                    name: "maksym",
+                    displayName: "Максим"
+                },
+                pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                authenticatorSelection: {
+                    authenticatorAttachment: "platform",
+                    userVerification: "required"
+                },
+                timeout: 60000
             }
-        } catch (e) {
-            status.innerText = "Помилка зв'язку. Перевір HTTPS та права доступу GAS.";
-            console.error(e);
+        };
+
+        log("Виклик системного вікна FaceID...");
+        const credential = await navigator.credentials.create(options);
+        
+        log("✅ УСПІХ! Отримано ID ключа: " + credential.id);
+        alert("Авторизація успішна!");
+
+    } catch (err) {
+        log(`ПОМИЛКА: ${err.name}`, true);
+        log(`ДЕТАЛІ: ${err.message}`, true);
+        
+        if (window.self !== window.top) {
+            log("⚠️ ДЕТЕКТОР: Скрипт запущено в IFRAME (це причина блокування в GAS).", true);
         }
-    });
-
-    async function register(username) {
-        const options = {
-            challenge: crypto.getRandomValues(new Uint8Array(32)),
-            rp: { name: "Secret", id: window.location.hostname },
-            user: { id: crypto.getRandomValues(new Uint8Array(16)), name: username, displayName: username },
-            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-            authenticatorSelection: { authenticatorAttachment: "platform" }
-        };
-
-        const credential = await navigator.credentials.create({ publicKey: options });
-        
-        // Відправляємо в Google Таблицю
-        await sendToGAS({
-            action: "register",
-            username: username,
-            credId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
-            pubKey: "PASSKEY_REGISTERED"
-        });
-
-        enterApp(username);
     }
-
-    async function login(username) {
-        // У спрощеному варіанті ми просто викликаємо FaceID для підтвердження
-        const options = {
-            challenge: crypto.getRandomValues(new Uint8Array(32)),
-            timeout: 60000,
-            userVerification: "required"
-        };
-        
-        await navigator.credentials.get({ publicKey: options });
-        enterApp(username);
-    }
-
-    async function sendToGAS(data) {
-        return fetch(GAS_URL, {
-            method: 'POST',
-            mode: 'no-cors', // Важливо для Google Apps Script
-            cache: 'no-cache',
-            body: JSON.stringify(data)
-        });
-    }
-
-    function enterApp(name) {
-        document.getElementById('display-name').innerText = name;
-        document.getElementById('login-screen').style.display = 'none';
-        const main = document.getElementById('main-screen');
-        main.style.display = 'flex';
-        setTimeout(() => main.style.opacity = '1', 50);
-    }
+});
 </script>
 
 </body>
