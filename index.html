@@ -3,166 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Auth | Максим</title>
+    <title>Secret App | v0.0.3</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #000;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        .container {
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-        .logo-box {
-            background: linear-gradient(135deg, #FFB000, #FFCC00);
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 30px;
-            border-radius: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
-        .shield-icon {
-            width: 60px;
-            height: 60px;
-            background: white;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); /* Спрощений щит */
-        }
-        h1 { font-size: 2.2rem; margin-bottom: 30px; font-weight: 600; }
-        .input-field {
-            background: #1C1C1E;
-            border: none;
-            color: white;
-            padding: 15px;
-            width: 100%;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        .btn-auth {
-            background: white;
-            color: black;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .btn-auth:active { opacity: 0.7; }
-        #debug-info {
-            margin-top: 25px;
-            font-size: 0.85rem;
-            color: #8E8E93;
-            text-align: left;
-            background: #1C1C1E;
-            padding: 15px;
-            border-radius: 10px;
-            display: none; /* Показуємо тільки при помилці або натисканні */
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-        .error-text { color: #FF453A; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: black; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { width: 90%; max-width: 350px; text-align: center; }
+        .logo { width: 120px; height: 120px; background: #FFB800; border-radius: 30px; margin: 0 auto 40px; display: flex; align-items: center; justify-content: center; }
+        .logo-icon { width: 60px; height: 60px; background: white; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+        h1 { font-size: 32px; font-weight: bold; margin-bottom: 30px; }
+        .input-field { background: #1C1C1E; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: left; color: #8E8E93; border: 1px solid #333; }
+        .btn { background: white; color: black; border: none; width: 100%; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; margin-bottom: 20px; }
+        .status-box { background: #1C1C1E; border-radius: 12px; padding: 15px; font-family: monospace; font-size: 12px; text-align: left; color: #8E8E93; min-height: 80px; }
+        .version { font-size: 10px; color: #444; margin-top: 20px; letter-spacing: 1px; }
+        .success { color: #4CD964; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="logo-box">
-        <div class="shield-icon"></div>
-    </div>
+<div class="card">
+    <div class="logo"><div class="logo-icon"></div></div>
     <h1>Secret</h1>
+    
+    <div class="input-field">Максим</div>
+    
+    <button class="btn" id="auth-btn">Увійти з FaceID</button>
+    
+    <div class="status-box" id="log-output">
+        > Очікування входу...
+    </div>
 
-    <input type="text" class="input-field" value="Максим" readonly>
-    <button id="auth-btn" class="btn-auth">Увійти з FaceID</button>
-
-    <div id="debug-info"></div>
+    <div class="version">0.0.3</div>
 </div>
 
 <script>
-const btn = document.getElementById('auth-btn');
-const debug = document.getElementById('debug-info');
+const log = (msg, isSuccess = false) => {
+    const div = document.getElementById('log-output');
+    div.innerHTML += `<br> > ${isSuccess ? '<span class="success">✅</span> ' : ''}${msg}`;
+};
 
-function log(message, isError = false) {
-    debug.style.display = 'block';
-    const span = document.createElement('div');
-    if (isError) span.className = 'error-text';
-    span.innerText = `> ${message}`;
-    debug.appendChild(span);
-    console.log(message);
-}
-
-btn.addEventListener('click', async () => {
-    debug.innerHTML = ''; // Очистити лог
+document.getElementById('auth-btn').addEventListener('click', async () => {
     log("Запуск автентифікації...");
 
     try {
-        // ПЕРЕВІРКА 1: Протокол
-        log(`Протокол: ${window.location.protocol}`);
-        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-            throw new Error("Браузер блокує FaceID на HTTP. Потрібен HTTPS.");
-        }
-
-        // ПЕРЕВІРКА 2: Наявність API
-        if (!window.PublicKeyCredential) {
-            throw new Error("Ваш браузер не підтримує WebAuthn API.");
-        }
-
-        // ПЕРЕВІРКА 3: Доступність біометрії
-        const isAvailable = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-        log(`Біометрія доступна: ${isAvailable}`);
-        if (!isAvailable) {
-            throw new Error("Платформний автентифікатор (FaceID) недоступний або вимкнений.");
-        }
-
-        // ПАРАМЕТРИ (спрощені для тесту реєстрації)
-        const challenge = new Uint8Array(32); 
+        // Симулюємо запит до WebAuthn (FaceID)
+        const challenge = new Uint8Array(32);
         window.crypto.getRandomValues(challenge);
 
         const options = {
             publicKey: {
                 challenge: challenge,
                 rp: { name: "Secret App", id: window.location.hostname },
-                user: {
-                    id: Uint8Array.from("USER_ID_MAX", c => c.charCodeAt(0)),
-                    name: "maksym",
-                    displayName: "Максим"
-                },
+                user: { id: Uint8Array.from("1", c => c.charCodeAt(0)), name: "Maksym", displayName: "Максим" },
                 pubKeyCredParams: [{ alg: -7, type: "public-key" }],
-                authenticatorSelection: {
-                    authenticatorAttachment: "platform",
-                    userVerification: "required"
-                },
+                authenticatorSelection: { authenticatorAttachment: "platform" },
                 timeout: 60000
             }
         };
 
-        log("Виклик системного вікна FaceID...");
         const credential = await navigator.credentials.create(options);
         
-        log("✅ УСПІХ! Отримано ID ключа: " + credential.id);
-        alert("Авторизація успішна!");
+        if (credential) {
+            log("УСПІХ! Ключ отримано", true);
+            log("Перехід до системи...");
+            
+            // Ось тут магія редиректу!
+            setTimeout(() => {
+                // Заміни 'home.html' на реальну назву твоєї сторінки
+                window.location.href = 'home.html'; 
+            }, 1000);
+        }
 
     } catch (err) {
-        log(`ПОМИЛКА: ${err.name}`, true);
-        log(`ДЕТАЛІ: ${err.message}`, true);
-        
-        if (window.self !== window.top) {
-            log("⚠️ ДЕТЕКТОР: Скрипт запущено в IFRAME (це причина блокування в GAS).", true);
-        }
+        log("Помилка: " + err.message);
     }
 });
 </script>
