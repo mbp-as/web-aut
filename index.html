@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>FaceID Auth | Максим</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f2f5; }
+        .card { background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; }
+        button { background: #007AFF; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        button:disabled { background: #ccc; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Вхід для Максима</h2>
+    <p>Використовуй FaceID для швидкого доступу</p>
+    <button id="auth-btn">Увійти через FaceID</button>
+    <p id="status"></p>
+</div>
+
+<script>
+document.getElementById('auth-btn').addEventListener('click', async () => {
+    const status = document.getElementById('status');
+    
+    // Перевірка, чи підтримує пристрій біометрію в браузері
+    if (!window.PublicKeyCredential) {
+        status.innerText = "Твій браузер не підтримує WebAuthn :(";
+        return;
+    }
+
+    // Параметри для створення ключа (спрощено)
+    // У реальному застосунку ці дані (challenge, user id) приходять з бекенду
+    const publicKeyCredentialCreationOptions = {
+        challenge: Uint8Array.from("random-string-from-server", c => c.charCodeAt(0)),
+        rp: { name: "Мій Крутий Додаток", id: window.location.hostname },
+        user: {
+            id: Uint8Array.from("user-id-123", c => c.charCodeAt(0)),
+            name: "Maksym",
+            displayName: "Максим"
+        },
+        pubKeyCredParams: [{ alg: -7, type: "public-key" }], // ES256 алгоритм
+        authenticatorSelection: { authenticatorAttachment: "platform" }, // "platform" активує FaceID/TouchID
+        timeout: 60000,
+        attestation: "direct"
+    };
+
+    try {
+        status.innerText = "Сканування...";
+        const credential = await navigator.credentials.create({
+            publicKey: publicKeyCredentialCreationOptions
+        });
+        
+        console.log("Успіх!", credential);
+        status.innerText = "Готово! Дані відправлено на сервер.";
+        // Тут ти відправляєш credential на свій сервер для перевірки
+    } catch (err) {
+        console.error(err);
+        status.innerText = "Помилка або скасовано: " + err.message;
+    }
+});
+</script>
+
+</body>
+</html>
